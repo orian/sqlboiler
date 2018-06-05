@@ -399,7 +399,9 @@ func (p *PostgresDriver) TranslateColumnType(c drivers.Column) drivers.Column {
 			c.Type = "null.Int"
 		case "smallint", "smallserial":
 			c.Type = "null.Int16"
-		case "decimal", "numeric", "double precision":
+		case "decimal", "numeric":
+			c.Type = "decimal.NullDecimal"
+		case "double precision":
 			c.Type = "null.Float64"
 		case "real":
 			c.Type = "null.Float32"
@@ -458,7 +460,9 @@ func (p *PostgresDriver) TranslateColumnType(c drivers.Column) drivers.Column {
 			c.Type = "int"
 		case "smallint", "smallserial":
 			c.Type = "int16"
-		case "decimal", "numeric", "double precision":
+		case "decimal", "numeric":
+			c.Type = "decimal.Decimal"
+		case "double precision":
 			c.Type = "float64"
 		case "real":
 			c.Type = "float32"
@@ -522,7 +526,9 @@ func getArrayType(c drivers.Column) string {
 		return "types.StringArray"
 	case "boolean":
 		return "types.BoolArray"
-	case "decimal", "numeric", "double precision", "real":
+	case "decimal", "numeric"
+		return "types.DecimalArray"
+	case "double precision", "real":
 		return "types.Float64Array"
 	default:
 		return "types.StringArray"
@@ -577,6 +583,12 @@ func (p PostgresDriver) Imports() (importers.Collection, error) {
 		},
 	}
 	col.BasedOnType = importers.Map{
+		"decimal.Decimal": {
+			ThirdParty: importers.List{`"github.com/ericlagergren/decimal"`},
+		},
+		"decimal.NullDecimal": {
+			ThirdParty: importers.List{`"github.com/ericlagergren/decimal"`},
+		},
 		"null.Float32": {
 			ThirdParty: importers.List{`"gopkg.in/volatiletech/null.v7"`},
 		},
